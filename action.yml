@@ -10,6 +10,10 @@ inputs:
     description: "Version of Kubernetes to validate against (kubeval --kubernetes-version)"
     default: "master"
     required: false
+  pull_request:
+    description: "Pull request number"
+    default: ""
+    required: false
   strict:
     description: "Whether to not to check for extra properties (kubeval --strict)" 
     default: true
@@ -41,6 +45,7 @@ runs:
     - ${{ inputs.ignore_missing_schemas }}
     - ${{ inputs.comment }}
     - ${{ inputs.token }}
+    - ${{ inputs.pull_request }}
 branding:
   icon: "check"
   color: "blue"

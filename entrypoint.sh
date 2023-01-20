@@ -12,6 +12,7 @@ OPENSHIFT=$4
 IGNORE_MISSING_SCHEMAS=$5
 COMMENT=$6
 GITHUB_TOKEN=$7
+PULL_REQUEST=$8
 
 # ------------------------
 # Vars
@@ -56,8 +57,13 @@ $(echo "${OUTPUT}" | grep -v ^PASS | grep -v "Set to ignore missing schemas")
 # comment to github
 if [ "${COMMENT}" = "true" ];then
 	PAYLOAD=$(echo '{}' | jq --arg body "${GIT_COMMENT}" '.body = $body')
-	COMMENTS_URL=$(cat ${GITHUB_EVENT_PATH} | jq -r .pull_request.comments_url)
-	curl -sS -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data "${PAYLOAD}" "${COMMENTS_URL}" >/dev/null
+	if [[ -z "$PULL_REQUEST" ]]; then
+		COMMENTS_URL=$(cat ${GITHUB_EVENT_PATH} | jq -r .pull_request.comments_url)
+	else
+		COMMENTS_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${PULL_REQUEST}/comments"
+	fi
+	echo "Commenting to ${COMMENTS_URL}"
+	curl -sS -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data "${PAYLOAD}" "${COMMENTS_URL}"
 fi
 
 exit ${SUCCESS}
